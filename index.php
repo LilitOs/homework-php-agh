@@ -1,9 +1,15 @@
 <?php
 session_start();
+$_SESSION['start'];
 $_SESSION['url'];
-$tab = array();
 $_SESSION['keywords'];
-array_merge($_SESSION['keywords'], $tab);
+
+if($_SESSION['start'] != 1){
+	$_SESSION['keywords'] = array();
+	$_SESSION['start'] = 1;
+}
+
+
 
 function array_count_values_of($value, $array) {
     $counts = array_count_values($array);
@@ -43,26 +49,35 @@ function array_count_values_of($value, $array) {
 					if (isset($_POST['url'])) {
 						$_SESSION['url'] = $_POST['url'];
 						$content = file_get_contents($_SESSION['url']);
-						$count = 0;
+						
 					if (isset($_POST['word'])) {
 						$word = $_POST['word'];
 						$words = preg_split('/\s+/', $content);
 						array_push($_SESSION['keywords'], $word);
+						$count = 0;
 						
 						echo "<div class=\"check-results\">
 								<h1> 3. Check results : </h1>
 							  </div>";
 						foreach($_SESSION['keywords'] as $mot){
-							echo $mot;
-							$count = array_count_values_of($mot, $words);
+							$maxCount = array_count_values_of($mot, $words);
 							echo "<div class=\"stepper\">
 									<div class=\"step\">
-									  <p class=\"step-number\"> ". $count ."</p>
+									  <p class=\"step-number\"> ". $maxCount ."</p>
 									  <p class =\"step-title\">Keyword : $mot</p>
-									  <p></p>
+									  <p>";
+									  for($i=0; $i<count($words); $i++){
+										if($words[$i] == $word){						
+											$count = $count+1;
+											echo $count ." ";
+										}
+									  }
+									  echo "</p>
 									 </div>
 								</div>";
-						}				
+
+						}	
+						$count = 0;
 					}
 					?>
 				<div class="get-text">
@@ -88,7 +103,9 @@ function array_count_values_of($value, $array) {
 							//echo substr_replace($content, "<span style=\"background-color:yellow;\">".$word."</span>;", $i, strlen($word) );
 						}
 					}*/
-					$content = str_replace($word, "<span style=\"background-color:yellow;\">".$word."</span>;", $content);
+					foreach($_SESSION['keywords'] as $mot){
+					$content = str_replace($mot, "<span style=\"background-color:yellow;\">".$mot."</span>", $content);
+					}
 					echo $content;
 				}
 				else if(!isset($_POST['word']) || $word == ""){
